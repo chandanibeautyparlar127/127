@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chandni Parlor 127 | Ultra Premium Login Portal</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        :root {
+            /* Ultra Premium Color Palette */
+            --primary: #9d4edd;
+            --primary-dark: #7b2cbf;
+            --primary-light: #c77dff;
+            --secondary: #ff6b6b;
+            --accent: #00d2d3;
+            --gold: #ffd166;
+            --platinum: #e8e9eb;
+            --diamond: #b9f2ff;
+            --dark: #0f0f23;
+            --darker: #070714;
+            --light: #f8f9fa;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-dark: rgba(0, 0, 0, 0.3);
+            --blur: blur(25px);
+            --radius-lg: 25px;
+            --radius-md: 15px;
+            --radius-sm: 10px;
+            --shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            --shadow-glow: 0 0 40px rgba(157, 78, 221, 0.3);
+            --gradient-primary: linear-gradient(135deg, #9d4edd 0%, #7b2cbf 100%);
+            --gradient-gold: linear-gradient(135deg, #ffd166 0%, #ffb347 100%);
+            --gradient-diamond: linear-gradient(135deg, #b9f2ff 0%, #00d2d3 100%);
+            --gradient-bg: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        }
+
+        body {
+            background: var(--gradient-bg);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .luxury-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .bg-particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.15;
+            animation: float 20s infinite linear;
+        }
+
+        .bg-gold-particle {
+            background: var(--gold);
+            filter: blur(30px);
+            opacity: 0.1;
+        }
+
+        .bg-diamond-particle {
+            background: var(--diamond);
+            filter: blur(50px);
+            opacity: 0.08;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+            25% { transform: translateY(-40px) translateX(40px) rotate(90deg); }
+            50% { transform: translateY(-20px) translateX(-40px) rotate(180deg); }
+            75% { transform: translateY(40px) translateX(20px) rotate(270deg); }
+        }
+
+        /* Loading Screen */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--darker);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease;
+        }
+
+        .luxury-loader {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+        }
+
+        .loader-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid transparent;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loader-ring:nth-child(2) {
+            border-top-color: var(--gold);
+            animation-delay: 0.3s;
+        }
+
+        .loader-ring:nth-child(3) {
+            border-top-color: var(--diamond);
+            animation-delay: 0.6s;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 18px;
+            color: var(--platinum);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 300;
+            position: relative;
+        }
+
+        .loading-text::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--gold), transparent);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        .main-container.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Header - Ultra Premium */
+        .luxury-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 40px;
+            z-index: 100;
+            background: rgba(15, 15, 35, 0.7);
+            backdrop-filter: var(--blur);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            box-shadow: var(--shadow-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .brand-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+        }
+
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-light), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .brand-tagline {
+            font-size: 12px;
+            color: var(--platinum);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 5px;
+        }
+
+        .auth-status {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--gradient-diamond);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--dark);
+            font-weight: bold;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn {
+            padding: 12px 30px;
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid var(--secondary);
+            border-radius: 30px;
+            color: var(--secondary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logout-btn:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Auth Container */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 120px 20px 60px;
+        }
+
+        .auth-wrapper {
+            width: 100%;
+            max-width: 500px;
+            perspective: 1000px;
+        }
+
+        .auth-card {
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            border-radius: var(--radius-lg);
+            padding: 50px 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow), var(--shadow-glow);
+            transform-style: preserve-3d;
+            animation: cardFloat 6s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes cardFloat {
+            0%, 100% { transform: translateY(0) rotateX(0deg); }
+            50% { transform: translateY(-20px) rotateX(5deg); }
+        }
+
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(157, 78, 221, 0.05), transparent);
+            z-index: -1;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .auth-title {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-light), var(--gold), var(--diamond));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .auth-subtitle {
+            color: var(--platinum);
+            font-size: 16px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        /* Auth Forms */
+        .auth-forms {
+            position: relative;
+        }
+
+        .form-container {
+            display: none;
+        }
+
+        .form-container.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--platinum);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 18px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 20px;
+            top: 50px;
+            color: var(--platinum);
+            font-size: 18px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50px;
+            background: none;
+            border: none;
+            color: var(--platinum);
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* Error Messages */
+        .error-message {
+            color: var(--secondary);
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .input-field.error {
+            border-color: var(--secondary);
+        }
+
+        .input-field.success {
+            border-color: var(--accent);
+        }
+
+        .form-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .switch-auth {
+            color: var(--platinum);
+            font-size: 14px;
+        }
+
+        .switch-btn {
+            background: none;
+            border: none;
+            color: var(--primary-light);
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .switch-btn:hover {
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(157, 78, 221, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* User Profile */
+        .user-profile {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: var(--gradient-gold);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: var(--dark);
+            font-weight: bold;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .profile-email {
+            color: var(--platinum);
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .access-btn {
+            padding: 15px 40px;
+            background: var(--gradient-diamond);
+            border: none;
+            border-radius: 30px;
+            color: var(--dark);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .access-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(0, 210, 211, 0.3);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 120px;
+            right: 40px;
+            padding: 20px 25px;
+            background: var(--glass);
+            backdrop-filter: var(--blur);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: slideIn 0.5s ease, fadeOut 0.5s ease 4.5s forwards;
+            max-width: 400px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .notification.success {
+            border-left-color: var(--accent);
+        }
+
+        .notification.error {
+            border-left-color: var(--secondary);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Footer */
+        .luxury-footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--platinum);
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: rgba(15, 15, 35, 0.5);
+            backdrop-filter: var(--blur);
+        }
+
+        .footer-text {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 210, 211, 0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(0, 210, 211, 0.3);
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .luxury-header {
+                padding: 20px;
+            }
+            
+            .brand-name {
+                font-size: 22px;
+            }
+            
+            .auth-card {
+                padding: 30px 20px;
+            }
+            
+            .auth-title {
+                font-size: 28px;
+            }
+            
+            .notification {
+                top: 100px;
+                right: 20px;
+                left: 20px;
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .auth-status {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .brand-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="luxury-bg" id="luxuryBg"></div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="luxury-loader">
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-ring"></div>
+            <div class="loader-center">
+                <i class="fas fa-gem"></i>
+            </div>
+        </div>
+        <div class="loading-text">Loading Luxury Portal</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container" id="mainContainer">
+        <!-- Header -->
+        <header class="luxury-header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="brand-text">
+                        <div class="brand-name">Chandni Parlor 127</div>
+                        <div class="brand-tagline">Ultra Premium Beauty Experience</div>
+                    </div>
+                </div>
+                
+                <div class="auth-status" id="authStatus" style="display: none;">
+                    <div class="user-avatar" id="userAvatar">G</div>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Auth Container -->
+        <main class="auth-container">
+            <div class="auth-wrapper">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1 class="auth-title">Exclusive Access</h1>
+                        <p class="auth-subtitle">Sign up or login to enter our premium world</p>
+                    </div>
+                    
+                    <div class="auth-forms">
+                        <!-- Signup Form -->
+                        <div class="form-container active" id="signupForm">
+                            <form id="signupFormElement">
+                                <div class="input-group">
+                                    <label class="input-label">Full Name</label>
+                                    <input type="text" class="input-field" id="signupName" placeholder="Enter your full name" required>
+                                    <i class="fas fa-user input-icon"></i>
+                                    <div class="error-message" id="nameError"></div>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label class="input-label">Email Address</label>
+                                    <input type="email" class="input-field" id="signupEmail" placeholder="Enter your email" required>
+                                    <i class="fas fa-envelope input-icon"></i>
+                                    <div class="error-message" id="emailError"></div>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label class="input-label">Phone Number</label>
+                                    <input type="tel" class="input-field" id="signupPhone" placeholder="Enter your phone number" required>
+                                    <i class="fas fa-phone input-icon"></i>
+                                    <div class="error-message" id="phoneError"></div>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label class="input-label">Password</label>
+                                    <input type="password" class="input-field" id="signupPassword" placeholder="Create a strong password" required>
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <button type="button" class="password-toggle" id="toggleSignupPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="error-message" id="passwordError"></div>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label class="input-label">Confirm Password</label>
+                                    <input type="password" class="input-field" id="signupConfirmPassword" placeholder="Confirm your password" required>
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <button type="button" class="password-toggle" id="toggleSignupConfirmPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="error-message" id="confirmPasswordError"></div>
+                                </div>
+                                
+                                <button type="submit" class="submit-btn">
+                                    <i class="fas fa-gem"></i> Create Premium Account
+                                </button>
+                            </form>
+                            
+                            <div class="form-footer">
+                                <div class="switch-auth">
+                                    Already have an account?
+                                    <button class="switch-btn" id="switchToLogin">Login Here</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Login Form -->
+                        <div class="form-container" id="loginForm">
+                            <form id="loginFormElement">
+                                <div class="input-group">
+                                    <label class="input-label">Email Address</label>
+                                    <input type="email" class="input-field" id="loginEmail" placeholder="Enter your email" required>
+                                    <i class="fas fa-envelope input-icon"></i>
+                                    <div class="error-message" id="loginEmailError"></div>
+                                </div>
+                                
+                                <div class="input-group">
+                                    <label class="input-label">Password</label>
+                                    <input type="password" class="input-field" id="loginPassword" placeholder="Enter your password" required>
+                                    <i class="fas fa-lock input-icon"></i>
+                                    <button type="button" class="password-toggle" id="toggleLoginPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <div class="error-message" id="loginPasswordError"></div>
+                                </div>
+                                
+                                <button type="submit" class="submit-btn">
+                                    <i class="fas fa-sign-in-alt"></i> Access Premium Portal
+                                </button>
+                            </form>
+                            
+                            <div class="form-footer">
+                                <div class="switch-auth">
+                                    Don't have an account?
+                                    <button class="switch-btn" id="switchToSignup">Sign Up Here</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- User Profile (After Login) -->
+                        <div class="form-container" id="userProfile">
+                            <div class="user-profile">
+                                <div class="profile-avatar" id="profileAvatar">G</div>
+                                <h2 class="profile-name" id="profileName">Guest User</h2>
+                                <p class="profile-email" id="profileEmail">guest@example.com</p>
+                                <p style="color: var(--platinum); margin-bottom: 30px; font-size: 16px;">
+                                    <i class="fas fa-check-circle" style="color: var(--accent);"></i>
+                                    Premium Account Verified
+                                </p>
+                                <button class="access-btn" id="accessPortalBtn">
+                                    <i class="fas fa-sparkles"></i> Enter Premium Portal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="luxury-footer">
+            <div class="footer-text">
+                © 2024 Chandni Parlor 127 | Ultra Premium Beauty Portal. 
+                All rights reserved. This portal provides exclusive access to our premium beauty products and services.
+            </div>
+            <div class="security-badge">
+                <i class="fas fa-shield-alt"></i>
+                <span>Enterprise-Grade Security • Firebase Protected • SSL Encrypted</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // Firebase Configuration
+        const firebaseConfig = {
+            databaseURL: "https://custmar-df34c-default-rtdb.firebaseio.com/"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global variables
+        let users = [];
+        let isAdminLoggedIn = false;
+        let currentEditingUser = null;
+        let filteredUsers = [];
+
+        // DOM Elements
+        const loginToggle = document.getElementById('login-toggle');
+        const signupToggle = document.getElementById('signup-toggle');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const toSignup = document.getElementById('to-signup');
+        const toLogin = document.getElementById('to-login');
+        const successMessage = document.getElementById('success-message');
+        const errorMessage = document.getElementById('error-message');
+        const messageText = document.getElementById('message-text');
+        const errorText = document.getElementById('error-text');
+        const usersList = document.getElementById('users-list');
+        const usersCount = document.getElementById('users-count');
+        const userSection = document.getElementById('userSection');
+        const adminSection = document.getElementById('adminSection');
+        const adminModal = document.getElementById('adminModal');
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const editModal = document.getElementById('editModal');
+        const searchInput = document.getElementById('search-input');
+        const searchResults = document.getElementById('search-results');
+
+        // Admin credentials
+        const ADMIN_ID = "84068";
+        const ADMIN_PASSWORD = "25751";
+
+        // Email validation function
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Search functionality
+        function searchUsers() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+
+            if (searchTerm === '') {
+                filteredUsers = [...users];
+                searchResults.textContent = `Showing all ${users.length} users`;
+            } else {
+                filteredUsers = users.filter(user =>
+                    user.name.toLowerCase().includes(searchTerm) ||
+                    user.email.toLowerCase().includes(searchTerm)
+                );
+                searchResults.textContent = `Found ${filteredUsers.length} users matching "${searchTerm}"`;
+            }
+
+            updateUsersDisplay();
+        }
+
+        // Enable search on Enter key
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                searchUsers();
+            }
+        });
+
+        // Real-time search as user types
+        searchInput.addEventListener('input', function () {
+            if (this.value.length === 0) {
+                filteredUsers = [...users];
+                updateUsersDisplay();
+                searchResults.textContent = `Showing all ${users.length} users`;
+            }
+        });
+
+        // Firebase Functions
+        async function saveUserToFirebase(userData) {
+            try {
+                const userRef = database.ref('users').push();
+                await userRef.set({
+                    ...userData,
+                    id: userRef.key,
+                    timestamp: new Date().toISOString(),
+                    status: 'active' // Default status
+                });
+                return userRef.key;
+            } catch (error) {
+                console.error('Error saving user to Firebase:', error);
+                return null;
+            }
+        }
+
+        async function getAllUsersFromFirebase() {
+            try {
+                const snapshot = await database.ref('users').once('value');
+                const usersData = snapshot.val();
+                if (usersData) {
+                    return Object.entries(usersData).map(([key, value]) => ({
+                        firebaseId: key,
+                        ...value
+                    }));
+                }
+                return [];
+            } catch (error) {
+                console.error('Error fetching users from Firebase:', error);
+                return [];
+            }
+        }
+
+        async function updateUserInFirebase(userId, userData) {
+            try {
+                await database.ref('users/' + userId).update(userData);
+                return true;
+            } catch (error) {
+                console.error('Error updating user in Firebase:', error);
+                return false;
+            }
+        }
+
+        async function deleteUserFromFirebase(userId) {
+            try {
+                await database.ref('users/' + userId).remove();
+                return true;
+            } catch (error) {
+                console.error('Error deleting user from Firebase:', error);
+                return false;
+            }
+        }
+
+        async function toggleUserStatus(userId, currentStatus) {
+            try {
+                const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+                await database.ref('users/' + userId).update({ status: newStatus });
+                return newStatus;
+            } catch (error) {
+                console.error('Error toggling user status:', error);
+                return null;
+            }
+        }
+
+        async function checkUserLogin(email, password) {
+            try {
+                const users = await getAllUsersFromFirebase();
+                const user = users.find(user => user.email === email && user.password === password);
+
+                // Check if user is disabled
+                if (user && user.status === 'disabled') {
+                    return { error: 'Account disabled by admin' };
+                }
+
+                return user;
+            } catch (error) {
+                console.error('Error checking user login:', error);
+                return null;
+            }
+        }
+
+        async function checkEmailExists(email, excludeUserId = null) {
+            try {
+                const users = await getAllUsersFromFirebase();
+                return users.some(user => user.email === email && user.firebaseId !== excludeUserId);
+            } catch (error) {
+                console.error('Error checking email existence:', error);
+                return false;
+            }
+        }
+
+        async function clearAllUsersFromFirebase() {
+            try {
+                await database.ref('users').remove();
+                return true;
+            } catch (error) {
+                console.error('Error clearing users from Firebase:', error);
+                return false;
+            }
+        }
+
+        // Initialize - Load users from Firebase
+        getAllUsersFromFirebase().then(fetchedUsers => {
+            users = fetchedUsers;
+            filteredUsers = [...users];
+        });
+
+        // Toggle between Login and Sign Up forms
+        function showLoginForm() {
+            loginToggle.classList.add('active');
+            signupToggle.classList.remove('active');
+            loginForm.classList.add('active');
+            signupForm.classList.remove('active');
+        }
+
+        function showSignupForm() {
+            signupToggle.classList.add('active');
+            loginToggle.classList.remove('active');
+            signupForm.classList.add('active');
+            loginForm.classList.remove('active');
+        }
+
+        loginToggle.addEventListener('click', showLoginForm);
+        signupToggle.addEventListener('click', showSignupForm);
+        toSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSignupForm();
+        });
+        toLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            showLoginForm();
+        });
+
+        // Admin login functions
+        function openAdminModal() {
+            adminModal.style.display = 'flex';
+        }
+
+        function closeAdminModal() {
+            adminModal.style.display = 'none';
+            document.getElementById('adminId').value = '';
+            document.getElementById('adminPassword').value = '';
+        }
+
+        async function loginAdmin() {
+            const adminId = document.getElementById('adminId').value;
+            const adminPassword = document.getElementById('adminPassword').value;
+
+            if (adminId === ADMIN_ID && adminPassword === ADMIN_PASSWORD) {
+                isAdminLoggedIn = true;
+                userSection.style.display = 'none';
+                adminSection.classList.add('active');
+                closeAdminModal();
+
+                // Load users data for admin
+                users = await getAllUsersFromFirebase();
+                filteredUsers = [...users];
+                updateUsersDisplay();
+
+                showSuccessMessage("Admin login successful!");
+            } else {
+                alert("Invalid Admin ID or Password!");
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            adminSection.classList.remove('active');
+            userSection.style.display = 'block';
+            showSuccessMessage("Admin logged out successfully!");
+        }
+
+        adminLoginBtn.addEventListener('click', openAdminModal);
+
+        // Update users display
+        function updateUsersDisplay() {
+            if (!isAdminLoggedIn) return;
+
+            const displayUsers = filteredUsers.length > 0 ? filteredUsers : users;
+            usersCount.textContent = `Total Users: ${displayUsers.length}`;
+
+            if (displayUsers.length === 0) {
+                usersList.innerHTML = '<div class="no-users">No users found</div>';
+                return;
+            }
+
+            usersList.innerHTML = displayUsers.map((user, index) => `
+                <div class="user-card ${user.status === 'disabled' ? 'disabled' : ''}">
+                    <div class="user-actions">
+                        <div class="action-icon edit-btn" onclick="openEditModal('${user.firebaseId}')" title="Edit User">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="action-icon toggle-btn-icon" onclick="toggleUser('${user.firebaseId}')" title="${user.status === 'active' ? 'Disable User' : 'Enable User'}">
+                            <i class="fas ${user.status === 'active' ? 'fa-user-slash' : 'fa-user-check'}"></i>
+                        </div>
+                        <div class="action-icon delete-btn" onclick="deleteUser('${user.firebaseId}')" title="Delete User">
+                            <i class="fas fa-trash"></i>
+                        </div>
+                    </div>
+                    <div class="user-name">
+                        ${user.name || 'N/A'}
+                        <span class="user-status ${user.status === 'active' ? 'status-active' : 'status-disabled'}">
+                            ${user.status === 'active' ? 'ACTIVE' : 'DISABLED'}
+                        </span>
+                    </div>
+                    <div class="user-email">${user.email}</div>
+                    <div class="user-meta">
+                        <span>Registered: ${new Date(user.timestamp).toLocaleDateString()}</span>
+                        <span>ID: ${index + 1}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // User status toggle function
+        async function toggleUser(userId) {
+            const user = users.find(u => u.firebaseId === userId);
+            if (!user) return;
+
+            const newStatus = await toggleUserStatus(userId, user.status);
+
+            if (newStatus) {
+                // Update local users array
+                const userIndex = users.findIndex(u => u.firebaseId === userId);
+                if (userIndex !== -1) {
+                    users[userIndex].status = newStatus;
+                }
+
+                // Update filtered users array
+                const filteredIndex = filteredUsers.findIndex(u => u.firebaseId === userId);
+                if (filteredIndex !== -1) {
+                    filteredUsers[filteredIndex].status = newStatus;
+                }
+
+                updateUsersDisplay();
+                showSuccessMessage(`User ${newStatus === 'active' ? 'enabled' : 'disabled'} successfully!`);
+            } else {
+                showErrorMessage("Failed to update user status!");
+            }
+        }
+
+        // User edit functions
+        function openEditModal(userId) {
+            const user = users.find(u => u.firebaseId === userId);
+            if (!user) return;
+
+            currentEditingUser = user;
+            document.getElementById('edit-name').value = user.name || '';
+            document.getElementById('edit-email').value = user.email || '';
+            document.getElementById('edit-password').value = '';
+            editModal.classList.add('active');
+        }
+
+        function closeEditModal() {
+            editModal.classList.remove('active');
+            currentEditingUser = null;
+            document.getElementById('edit-email-validation').classList.remove('valid', 'invalid');
+        }
+
+        async function saveUserEdit() {
+            if (!currentEditingUser) return;
+
+            const name = document.getElementById('edit-name').value;
+            const email = document.getElementById('edit-email').value;
+            const password = document.getElementById('edit-password').value;
+
+            // Validate email
+            if (!isValidEmail(email)) {
+                showErrorMessage("Please enter a valid email address!");
+                return;
+            }
+
+            // Check if email already exists (excluding current user)
+            const emailExists = await checkEmailExists(email, currentEditingUser.firebaseId);
+            if (emailExists) {
+                showErrorMessage("Email already exists! Please use a different email.");
+                return;
+            }
+
+            const updateData = {
+                name: name,
+                email: email
+            };
+
+            // Only update password if provided
+            if (password) {
+                updateData.password = password;
+            }
+
+            const success = await updateUserInFirebase(currentEditingUser.firebaseId, updateData);
+
+            if (success) {
+                // Update local users array
+                const userIndex = users.findIndex(u => u.firebaseId === currentEditingUser.firebaseId);
+                if (userIndex !== -1) {
+                    users[userIndex] = { ...users[userIndex], ...updateData };
+                }
+
+                // Update filtered users array
+                const filteredIndex = filteredUsers.findIndex(u => u.firebaseId === currentEditingUser.firebaseId);
+                if (filteredIndex !== -1) {
+                    filteredUsers[filteredIndex] = { ...filteredUsers[filteredIndex], ...updateData };
+                }
+
+                updateUsersDisplay();
+                closeEditModal();
+                showSuccessMessage("User updated successfully!");
+            } else {
+                showErrorMessage("Failed to update user!");
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm("Are you sure you want to delete this user?")) return;
+
+            const success = await deleteUserFromFirebase(userId);
+
+            if (success) {
+                // Remove from local users array
+                users = users.filter(u => u.firebaseId !== userId);
+                filteredUsers = filteredUsers.filter(u => u.firebaseId !== userId);
+                updateUsersDisplay();
+                showSuccessMessage("User deleted successfully!");
+            } else {
+                showErrorMessage("Failed to delete user!");
+            }
+        }
+
+        // Message functions
+        function showSuccessMessage(text) {
+            messageText.textContent = text;
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        function showErrorMessage(text) {
+            errorText.textContent = text;
+            errorMessage.classList.add('show');
+            setTimeout(() => {
+                errorMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // Form submission handling
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            if (!isValidEmail(email)) {
+                showErrorMessage("Please enter a valid email address!");
+                return;
+            }
+
+            const user = await checkUserLogin(email, password);
+
+            if (user && user.error) {
+                showErrorMessage(user.error);
+                return;
+            }
+
+            if (user) {
+                showSuccessMessage("Login successful! Redirecting...");
+
+                setTimeout(() => {
+                    window.location.href = "https://chandanibeautyparlar127.github.io/ai/";
+                }, 2000);
+            } else {
+                showErrorMessage("Invalid email or password!");
+            }
+        });
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm').value;
+
+            // Final validation
+            if (!isValidEmail(email)) {
+                showErrorMessage("Please enter a valid email address!");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showErrorMessage("Passwords do not match!");
+                return;
+            }
+
+            try {
+                // Check if email already exists
+                const emailExists = await checkEmailExists(email);
+
+                if (emailExists) {
+                    showErrorMessage("Email already registered!");
+                    return;
+                }
+
+                // Create new user
+                const newUser = {
+                    name: name,
+                    email: email,
+                    password: password,
+                    timestamp: new Date().toISOString(),
+                    status: 'active'
+                };
+
+                // Save to Firebase
+                const userId = await saveUserToFirebase(newUser);
+
+                if (userId) {
+                    // Update local users array
+                    newUser.firebaseId = userId;
+                    users.push(newUser);
+                    filteredUsers.push(newUser);
+
+                    showSuccessMessage("Account created successfully!");
+                    signupForm.reset();
+                    document.getElementById('signup-submit-btn').disabled = true;
+
+                    // Update admin display if admin is logged in
+                    if (isAdminLoggedIn) {
+                        updateUsersDisplay();
+                    }
+                } else {
+                    showErrorMessage("Failed to create account! Please try again.");
+                }
+            } catch (error) {
+                showErrorMessage("Signup failed! Please try again.");
+            }
+        });
+
+        // Export users data
+        async function exportUsers() {
+            const exportUsers = filteredUsers.length > 0 ? filteredUsers : users;
+
+            if (exportUsers.length === 0) {
+                alert("No users to export!");
+                return;
+            }
+
+            const dataStr = JSON.stringify(exportUsers, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'users-data.json';
+            link.click();
+            URL.revokeObjectURL(url);
+
+            showSuccessMessage("Data exported successfully!");
+        }
+
+        // Clear all users
+        async function clearAllUsers() {
+            if (confirm("Are you sure you want to delete all user data from Firebase?")) {
+                const cleared = await clearAllUsersFromFirebase();
+
+                if (cleared) {
+                    users = [];
+                    filteredUsers = [];
+                    updateUsersDisplay();
+                    showSuccessMessage("All user data cleared from Firebase!");
+                } else {
+                    showErrorMessage("Failed to clear data from Firebase!");
+                }
+            }
+        }
+
+        // Real-time email validation for signup
+        document.getElementById('signup-email').addEventListener('input', function (e) {
+            const email = e.target.value;
+            const validationElement = document.getElementById('signup-email-validation');
+            const submitBtn = document.getElementById('signup-submit-btn');
+
+            if (email === '') {
+                e.target.classList.remove('valid', 'invalid');
+                validationElement.classList.remove('valid', 'invalid');
+                submitBtn.disabled = true;
+                return;
+            }
+
+            if (isValidEmail(email)) {
+                e.target.classList.remove('invalid');
+                e.target.classList.add('valid');
+                validationElement.textContent = '✓ Valid email address';
+                validationElement.classList.remove('invalid');
+                validationElement.classList.add('valid');
+                validateSignupForm();
+            } else {
+                e.target.classList.remove('valid');
+                e.target.classList.add('invalid');
+                validationElement.textContent = '✗ Please enter a valid email address';
+                validationElement.classList.remove('valid');
+                validationElement.classList.add('invalid');
+                submitBtn.disabled = true;
+            }
+        });
+
+        // Password match validation
+        document.getElementById('signup-confirm').addEventListener('input', function (e) {
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = e.target.value;
+            const validationElement = document.getElementById('password-match-validation');
+
+            if (confirmPassword === '') {
+                validationElement.classList.remove('valid', 'invalid');
+                return;
+            }
+
+            if (password === confirmPassword) {
+                validationElement.textContent = '✓ Passwords match';
+                validationElement.classList.remove('invalid');
+                validationElement.classList.add('valid');
+                validateSignupForm();
+            } else {
+                validationElement.textContent = '✗ Passwords do not match';
+                validationElement.classList.remove('valid');
+                validationElement.classList.add('invalid');
+                document.getElementById('signup-submit-btn').disabled = true;
+            }
+        });
+
+        // Validate complete signup form
+        function validateSignupForm() {
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const confirmPassword = document.getElementById('signup-confirm').value;
+            const submitBtn = document.getElementById('signup-submit-btn');
+
+            if (name && isValidEmail(email) && password && password === confirmPassword) {
+                submitBtn.disabled = false;
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Also validate on other input changes
+        document.getElementById('signup-name').addEventListener('input', validateSignupForm);
+        document.getElementById('signup-password').addEventListener('input', validateSignupForm);
+
+    </script>
+</body>
+</html>
